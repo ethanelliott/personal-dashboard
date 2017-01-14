@@ -1,0 +1,69 @@
+extends layout
+
+block content
+  header
+    script.
+      function startTime() {
+        var today = new Date();
+        var y = today.getFullYear();
+        var mo = today.getMonth()+1;
+        var d = today.getDate();
+        var h = today.getHours();
+        var m = today.getMinutes();
+        var s = today.getSeconds();
+        m = checkTime(m);
+        s = checkTime(s);
+        mo = checkTime(mo);
+        d = checkTime(d);
+        var dat = today.toDateString();
+        document.getElementById('clock').innerHTML = dat + " | " + h + ":" + m + ":" + s;
+        var t = setTimeout(startTime, 1);
+      }
+      function checkTime(i) {
+        if (i < 10) {i = "0" + i}; 
+        return i;
+      }
+    #clock
+  main
+    #item
+      if currentEvent
+        h1.heading Current Class:
+        #event
+          h1.name #{currentEvent.name} #{currentEvent.type}
+          h2.location #{currentEvent.location}
+          h2.time #{currentEvent.start_time_string} - #{currentEvent.end_time_string}
+          #countdownfrom
+            h2.timeuntillevent
+          script.
+            var nObj = new Date("#{currentEvent.end_date_object}");
+            var countString = nObj.getFullYear() + "/" + (nObj.getMonth()+1) + "/" + nObj.getDate() + " " + nObj.getHours() + ":" + nObj.getMinutes();
+            $("#countdownfrom").countdown(countString, function(event) {
+              $(".timeuntillevent").text(
+                event.strftime('ends in %M mins')
+              );
+            });
+
+      if nextEvent
+        h1.heading Next Class:
+        #event
+          h1.name #{nextEvent.name} #{nextEvent.type}
+          h2.location #{nextEvent.location}
+          h2.time #{nextEvent.start_time_string} - #{nextEvent.end_time_string}
+          #countdown
+            h2.time2event
+          script.
+            var nObj = new Date("#{nextEvent.start_date_object}");
+            var countString = nObj.getFullYear() + "/" + (nObj.getMonth()+1) + "/" + nObj.getDate() + " " + nObj.getHours() + ":" + nObj.getMinutes();
+            $("#countdown").countdown(countString, function(event) {
+              $(".time2event").text(
+                event.strftime('in %H hrs, %M mins')
+              );
+            });
+          
+    #item
+      h1.heading Today's Classes:
+      each e, i in events
+        #event
+          h1.name #{e.name} #{e.type}
+          h2.location #{e.location}
+          h2.time #{e.start_time_string} - #{e.end_time_string}
