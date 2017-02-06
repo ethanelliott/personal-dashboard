@@ -8,8 +8,8 @@ var dt = require('datetimejs');
 var router = express.Router();
 
 router.get('/scrape', function(req, res, next){
-  var username = "100622168";
-  var password = "L8E5T9";
+  var username = "";
+  var password = "";
   var payload = {
     'user': username,
     'pass': password,
