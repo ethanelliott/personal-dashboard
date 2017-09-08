@@ -12,6 +12,7 @@
     "datetimejs": "^0.3.4",
     "debug": "~2.2.0",
     "express": "~4.14.0",
+    "html-soup": "^1.1.1",
     "ical2json": "^1.0.0",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",

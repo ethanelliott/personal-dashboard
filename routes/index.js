@@ -4,45 +4,51 @@ var request = require('request-ssl');
 var cheerio = require('cheerio');
 var ical2json = require("ical2json");
 var dt = require('datetimejs');
+var htmlsoup = require('html-soup');
 
 var router = express.Router();
 
 router.get('/scrape', function(req, res, next){
-  var username = "";
-  var password = "";
-  var payload = {
-    'user': username,
-    'pass': password,
-    'uuid': '0xACA021'
-  };
-  var j = request.jar();
-  request.addFingerprint('ssbp.mycampus.ca', 'D9:14:01:63:8B:D7:FB:EC:AD:65:0B:E1:2C:36:B3:11:8A:70:64:04');
-  request.addFingerprint('portal.mycampus.ca', 'BA:AD:35:38:1E:8C:87:F3:BD:05:16:B7:E0:63:BA:EA:66:06:2D:16');
-  var selectTermURL = "https://ssbp.mycampus.ca/prod_uoit/bwcklibs.P_StoreTerm";
-  var pageURL = "http://portal.mycampus.ca/cp/ip/login?sys=sct&url=https://ssbp.mycampus.ca/prod_uoit/twbkwbis.P_GenMenu?name=bmenu.P_RegMnu2";
-  var requestURL = "http://portal.mycampus.ca/cp/ip/login?sys=sct&url=https://ssbp.mycampus.ca/prod_uoit/bwskfshd.P_CrseSchdDetl";
-  var detailURL = "https://ssbp.mycampus.ca/prod_uoit/bwskfshd.P_CrseSchdDetl";
-  request.post({url:'https://portal.mycampus.ca/cp/home/login', form: payload, jar:j}, function(er,rs,bd) {
-    console.log(rs.statusCode);
-    var termData = {'term_in': "201701", "name_var":"bmenu.P_RegMnu2"};
-    request.post({url:pageURL, jar:j}, function(err,rsp,bdy) {
-      console.log(rsp.statusCode);
-      request.post({url:selectTermURL, form:termData, jar:j}, function(erro,resp,body) {
-        console.log(erro);
-        //res.json({"jar":j, "error":erro, "response": resp, "data": body});
-      });
-    });
-  });
+	var username = "100622168";
+	var password = "L8E5T9";
+	var payload = {
+	'user': username,
+	'pass': password,
+	'uuid': '0xACA021'
+	};
+	var dd = new Date();
+	var cM = dd.getMonth() + 1;
+	var termDate = "";
+	if (cM > 0 && cM < 9) {
+		termDate = dd.getFullYear() + "01";
+	} else if (cM > 8 && cM < 13) {
+		termDate = dd.getFullYear() + "09";
+	}
+	var detailLoad = {
+		'term_in': termDate
+	};
+	var sess = request.jar();
+	var loginURL = "http://portal.mycampus.ca/cp/home/login";
+	var baseURL = "http://portal.mycampus.ca/cp/ip/login?sys=sct&url=";
+	var detailURL = "http://ssbp.mycampus.ca/prod_uoit/bwskfshd.P_CrseSchdDetl";
+	 request.post({url:loginURL, form: payload, jar:sess}, function(err_0,res_0,body_0) {
+		request.get({url:(baseURL + detailURL), jar:sess}, function(err_1, res_1, body_1) {
+			request.post({url:detailURL, form: detailLoad, jar:sess}, function(err_2, res_2, body_2) {
+				var page = htmlsoup.parse(body_2);
+				console.log(page);
+				res.send(body_2);
+			});
+		});
+  	});
 });
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   var schArray = [];
-  var url = "https://calendar.google.com/calendar/ical/gdmkcomaf0lunq1hqgc6c5urec%40group.calendar.google.com/private-f554f24e635c1c8add5f1625d7a4c42f/basic.ics";
+  var url = "http://calendar.google.com/calendar/ical/gdmkcomaf0lunq1hqgc6c5urec%40group.calendar.google.com/private-f554f24e635c1c8add5f1625d7a4c42f/basic.ics";
   request.get(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
-        var icalJSON = ical2json.convert(body);
-         var sch = icalJSON;
+        var sch = ical2json.convert(body).VCALENDAR[0];
          for (i = 0; i < sch.VEVENT.length; i++)
          {
            var today = new Date();
